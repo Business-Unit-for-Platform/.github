@@ -6,8 +6,8 @@ This document explains the detailed call order for Platform organization users.
 
 ```text
 Business requirements / SQL / data model
-  -> Clone-Bot prepares the platform base repo
-  -> codegen-bot generates business modules
+  -> codegen-bot generates business modules first
+  -> Clone-Bot / restructure places generated code into future layout
   -> generated code lands in a branch/PR
   -> review permissions, APIs, data boundaries, tests
   -> merge into the business repository
@@ -16,9 +16,19 @@ Business requirements / SQL / data model
 
 ## Tool Responsibilities
 
-### Clone-Bot
+### codegen-bot
 
-Clone-Bot creates or refreshes platform base repositories.
+`codegen-bot` runs first. It generates business modules from SQL/data models.
+
+Use it when:
+
+- the business tables and module boundaries are known;
+- backend api/biz modules and admin frontend pages should be generated;
+- code should enter the target business repo through branch + PR.
+
+### Clone-Bot / restructure
+
+Clone-Bot/restructure runs after codegen when the generated result needs to be placed into the standard Platform layout.
 
 Relevant repositories:
 
@@ -33,16 +43,6 @@ Use it when:
 - the target is a generated/base repo where destructive rebuild is explicitly allowed.
 
 Do not use destructive rebuild for long-lived business repos unless explicitly approved.
-
-### codegen-bot
-
-`codegen-bot` generates business modules from SQL/data models.
-
-Use it when:
-
-- the business tables and module boundaries are known;
-- backend api/biz modules and admin frontend pages should be generated;
-- code should enter the target business repo through branch + PR.
 
 ## Modes
 

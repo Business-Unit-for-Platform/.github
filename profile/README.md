@@ -26,8 +26,8 @@
 
 ```text
 requirements / data model / SQL
-  -> Clone-Bot 初始化或更新 RuoYi/Yudao 平台底座
-  -> codegen-bot 生成业务模块
+  -> codegen-bot 先生成业务模块
+  -> Clone-Bot / restructure 再整理进 future layout / 平台底座结构
   -> 生成代码以 branch + PR 进入业务仓库
   -> Review / Test / Merge
   -> 独立部署仓库发布
@@ -37,26 +37,36 @@ requirements / data model / SQL
 
 | Step | Tool | Role | Analogy |
 |---|---|---|---|
-| 1 | `Clone-ruoyi-vue-pro-Bot` / frontend clone bots | 初始化、同步或重建平台底座 | 建房子 / 搭框架 |
-| 2 | `codegen-bot` | 根据业务 SQL/数据模型生成业务模块 | 装修房间 / 生成业务功能 |
+| 1 | `codegen-bot` | 根据业务 SQL/数据模型生成业务模块 | 先生成业务功能 |
+| 2 | `Clone-ruoyi-vue-pro-Bot` / restructure | 将生成结果整理进 future layout / 平台底座结构 | 再整理房屋结构 |
 | 3 | PR review | 审查权限、API、数据边界、测试 | 验房 |
 | 4 | deploy repo | 发布构建产物 | 交付入住 |
 
-Clone-Bot 和 codegen-bot **不要过早合并**：
+codegen-bot 和 Clone-Bot/restructure **不要过早合并**：
 
-- Clone-Bot 的 `rebuild_from_upstream` 模式可能删除/重建目标底座仓库，用于重新跟上最新 upstream/template。
-- codegen-bot 面向长期业务仓库时，应默认保留历史，通过 branch + PR 合入。
+- codegen-bot 先生成业务模块，面向长期业务仓库时应默认保留历史，通过 branch + PR 合入。
+- Clone-Bot/restructure 负责把生成结果整理进标准 future layout；其 `rebuild_from_upstream` 模式可能删除/重建目标底座仓库，只用于明确可重建场景。
 - 两者生命周期、风险和权限边界不同，先保持独立工具仓库。
 
 ## Operating Modes
 
-### Mode A: Build or refresh base repo
+### Mode A: Generate business module first
 
-用于：新业务第一次建立 RuoYi/Yudao 底座，或明确要从最新 upstream/template 重建底座。
+用于：业务需求已经有 SQL/数据模型，需要先生成后端模块和管理后台页面。
 
 ```text
-Clone-ruoyi-vue-pro-Bot
-  input: target_org / backend_repo / branch / layout_mode / mode
+codegen-bot
+  input: business SQL / module name / table prefix / target backend repo / target frontend repo / layout_mode
+  output: generated backend modules + frontend pages + manifest/report
+```
+
+### Mode B: Restructure into Platform layout
+
+用于：codegen 已经产出业务模块，需要把生成结果整理进标准 RuoYi/Yudao future layout。
+
+```text
+Clone-ruoyi-vue-pro-Bot / restructure tools
+  input: generated modules / target repo / source repo / source ref
   output: future-vue-pro-style backend repo
 ```
 
@@ -65,16 +75,6 @@ Clone-ruoyi-vue-pro-Bot
 - `rebuild_from_upstream` 可以是破坏性模式，只用于底座/可重建仓库。
 - 对长期业务仓库，不要默认删除重建。
 - frontend clone bots 负责 UI admin / uniapp 等前端底座。
-
-### Mode B: Generate business module into an existing repo
-
-用于：业务需求已经有 SQL/数据模型，需要生成后端模块和管理后台页面。
-
-```text
-codegen-bot
-  input: business SQL / module name / table prefix / target backend repo / target frontend repo / layout_mode
-  output: generated backend modules + frontend pages + manifest/report
-```
 
 规则：
 
